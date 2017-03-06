@@ -43,11 +43,16 @@ allowed = function(url, parenturl)
     return false
   end
 
+  if string.match(url, "https?://app%.net/adn/post/") then
+    return false
+  end
+
   if item_type == "users" and string.match(url, "/posts?/") then
     return false
   end
 
-  if item_type == "posts" and string.match(url, "^https?://files%.app%.net") then
+  if item_type == "posts"
+     and (string.match(url, "^https?://files%.app%.net") or string.match(url, "^https?://[^/]*app%.net/b/.")) then
     return true
   end
 
@@ -190,6 +195,10 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   if abortgrab == true then
     io.stdout:write("ABORTING...\n")
     return wget.actions.ABORT
+  end
+
+  if string.match(url["url"], "^https?://[^/]*app%.net/b/") and status_code == 302 then
+    return wget.actions.EXIT
   end
   
   if status_code >= 500 or
