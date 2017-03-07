@@ -51,9 +51,20 @@ allowed = function(url, parenturl)
     return false
   end
 
-  if item_type == "posts"
-     and (string.match(url, "^https?://files%.app%.net") or string.match(url, "^https?://[^/]*app%.net/b/.")) then
-    return true
+  if item_type == "posts" then
+    if string.match(url, "^https?://[^/]*app%.net/b/.") then
+      return true
+
+    elseif parenturl ~= nil and string.match(parenturl, "[0-9]+/photo/")
+     and (string.match(url, "^https?://files%.app%.net")
+     or string.match(url, "^https?://[^/]*cloudfront%.net/image/")) then
+      return true
+
+    elseif string.match(url, "[0-9]+/reposters")
+     or string.match(url, "[0-9]+/stars")
+     or string.match(url, "oembed%?url=") then
+      return false
+    end
   end
 
   for s in string.gmatch(url, "([0-9]+)") do
@@ -185,7 +196,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   status_code = http_stat["statcode"]
 
   url_count = url_count + 1
-  io.stdout:write(url_count .. "=" .. status_code .. " " .. url["url"] .. ".  \n")
+  io.stdout:write(url_count .. "=" .. status_code .. " " .. url["url"] .. "  \n")
   io.stdout:flush()
 
   if (status_code >= 200 and status_code <= 399) then
